@@ -12,7 +12,7 @@ const userModels = require("../../models/userModels");
 // thêm Products vào trong database
 exports.postProducts = (req, res) => {
   let data_Products_all = [];
-  console.log("data_Products:", data_Products);
+
   data_Products.map((value) => {
     const Product = {
       _id: value._id.$oid || value._id,
@@ -39,54 +39,68 @@ exports.postProducts = (req, res) => {
 
 // lấy danh sách User
 exports.postAllData = async (req, res) => {
-  console.log("lấy danh sách User");
+
   const { count, page, search } = req.query;
   // count : số lượng trong 1 trang
   // page : trang hiện tại
   // search : tên tìm kiếm
-  console.log("search:", search);
 
   const pageSize = +req.query.count;
   const currentPage = +req.query.page;
+  try {
+    let users;
 
-  let users;
-  if (!search) {
-    users = await userModels.find({ isAdmin: "Client" });
-  } else {
-    users = await userModels.find({
-      isAdmin: "Client",
-      fullName: { $regex: new RegExp(search, "i") },
-    });
+    if (!search) {
+      users = await userModels.find({ isAdmin: "Client" });
+    } else {
+      users = await userModels.find({
+        isAdmin: "Client",
+        fullName: { $regex: new RegExp(search, "i") },
+      });
+    }
+
+    // Tính vị trí đầu và cuối của trang hiện tại
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, users.length);
+
+    const totalRecords = users.length; // Tổng số bản ghi
+    const totalPages = Math.ceil(totalRecords / pageSize); // Tổng số trang
+
+    // Lấy dữ liệu cho trang hiện tại
+    const currentPageData = users.slice(startIndex, endIndex);
+
+    const data_send = {
+      totalPages: totalPages,
+      users: currentPageData,
+    };
+
+    res.status(200).send(data_send);
+  } catch (error) {
+
+    res.status(500).send({ errorMessage: "Lỗi server" });
   }
-
-  // Tính vị trí đầu và cuối của trang hiện tại
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-
-  const totalRecords = users.length; // Tổng số bản ghi
-
-  const totalPages = Math.ceil(totalRecords / pageSize); // Tổng số trang
-
-  // Lấy dữ liệu cho trang hiện tại
-  const currentPageData = users.slice(startIndex, endIndex);
-
-  const data_send = {
-    totalPages: totalPages,
-    users: currentPageData,
-  };
-  res.status(200).send(data_send);
 };
 
 // lấy user theo id để sửa
 exports.getDetailData = async (req, res) => {
   const userId = req.params.userId;
-  console.log(req);
-  const user = await userModels.findById(userId);
-  res.status(200).send({ message: "lấy dữ liệu thành công", user });
+  try {
+    const user = await userModels.findById(userId);
+
+    if (!user) {
+      return res.status(404).send({ errorMessage: 'Không tìm thấy người dùng' });
+    }
+
+    res.status(200).send({ message: "Lấy dữ liệu thành công", user });
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu:", error);
+    res.status(500).send({ errorMessage: "Lỗi server" });
+  }
 };
 
+
 // update user
-exports.putUpdateUser = async (req, res) => {};
+exports.putUpdateUser = async (req, res) => { };
 
 // xóa user
 exports.deleteUser = async (req, res) => {
@@ -104,7 +118,7 @@ exports.deleteUser = async (req, res) => {
     }
   } catch (error) {
     // Xử lý lỗi nếu có
-    console.error(error);
+
     return res.status(500).send({ message: "Lỗi server" });
   }
 };
