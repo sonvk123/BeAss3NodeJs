@@ -84,6 +84,13 @@ exports.getDetail = async (req, res) => {
       return res.status(404).send({ message: "Không tìm thấy sản phẩm" });
     }
 
+    for (let i = 1; i <= 4; i++) {
+      const imageUrl = product[`img${i}`];
+      if (!imageUrl.includes("firebasestorage")) {
+        product[`img${i}`] = `${url}/${imageUrl}`;
+      }
+    }
+
     res.status(200).send({ message: "Lấy dữ liệu thành công", product });
   } catch (error) {
 
