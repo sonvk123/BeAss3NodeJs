@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 const userModels = require("../../models/userModels");
 const ProductModel = require("../../models/productModels");
 
+
+let url =
+  process.env.NODE_ENV === "production"
+    ? "https://beass3nodejs.onrender.com"
+    : "http://localhost:5000";
+
+
 // Lấy danh sách cart
 exports.getCarts = async (req, res) => {
   try {
@@ -12,11 +19,6 @@ exports.getCarts = async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy người dùng" });
     }
 
-    // KHI DELOY
-    let url = "https://ass3-nodejs-q5t8.onrender.com";
-    // KHI DEV
-    // let url = "http://localhost:5000";
-
     const cart = user.cart;
 
     cart.items.forEach((item) => {
@@ -24,10 +26,9 @@ exports.getCarts = async (req, res) => {
         item.img = `${url}/${imageUrl}`;
       }
     });
-
     res.status(200).json(cart.items);
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: "Lỗi Server" });
   }
 };
@@ -53,10 +54,11 @@ exports.postAddToCart = async (req, res) => {
       .status(200)
       .json({ message: "Đã thêm sản phẩm vào giỏ hàng thành công" });
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: "lỗi Server" });
   }
 };
+
 // Xóa sản phẩm khỏi giỏ hàng
 exports.deleteToCart = async (req, res) => {
   try {
@@ -71,7 +73,7 @@ exports.deleteToCart = async (req, res) => {
 
     res.status(200).json({ message: "Đã xóa sản phẩm khỏi giỏ hàng" });
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: "Lỗi Server" });
   }
 };
@@ -91,7 +93,7 @@ exports.putToCart = async (req, res) => {
       message: "Số lượng mặt hàng trong giỏ hàng được cập nhật thành công",
     });
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: "Lỗi Server" });
   }
 };
