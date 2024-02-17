@@ -1,5 +1,11 @@
 const productModels = require("../../models/productModels");
 
+
+let url =
+  process.env.NODE_ENV === "production"
+    ? "https://beass3nodejs.onrender.com"
+    : "http://localhost:5000";
+
 // lấy danh sách products và theo thên
 exports.getPagination = async (req, res) => {
   try {
@@ -28,10 +34,6 @@ exports.getPagination = async (req, res) => {
 
     const totalPages = Math.ceil(totalRecords / pageSize); // Tổng số trang
 
-    // KHI DELOY
-    let url = "https://ass3-nodejs-q5t8.onrender.com";
-    // KHI DEV
-    // let url = "http://localhost:5000";
 
     let newProducts = [];
     products.map((product) => {
@@ -64,15 +66,26 @@ exports.getPagination = async (req, res) => {
 
     res.status(200).json(data_send);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Lỗi máy chủ" });
   }
 };
+
 // xem chi tiết 1 product
 exports.getDetail = async (req, res) => {
   const productId = req.params.productId;
-  const product = await productModels.findById(productId);
-  res.status(200).send({ message: "lấy dữ liệu thành công", product });
+
+  try {
+    const product = await productModels.findById(productId);
+
+    if (!product) {
+      return res.status(404).send({ message: "Không tìm thấy sản phẩm" });
+    }
+
+    res.status(200).send({ message: "Lấy dữ liệu thành công", product });
+  } catch (error) {
+
+    res.status(500).send({ message: "Lỗi máy chủ" });
+  }
 };
 
 // thêm product
@@ -80,20 +93,25 @@ exports.postAddProduct = async (req, res) => {
   const { Category, Price, LongDes, ShortDes, Name, Quantity } = req.body;
   const Images = req.files;
 
-  const newProduct = await productModels.create({
-    category: Category,
-    img1: Images[0].path,
-    img2: Images[1].path,
-    img3: Images[2].path,
-    img4: Images[3].path,
-    long_desc: LongDes,
-    short_desc: ShortDes,
-    name: Name,
-    price: Price,
-    quantity: Quantity,
-  });
+  try {
+    const newProduct = await productModels.create({
+      category: Category,
+      img1: Images[0].path,
+      img2: Images[1].path,
+      img3: Images[2].path,
+      img4: Images[3].path,
+      long_desc: LongDes,
+      short_desc: ShortDes,
+      name: Name,
+      price: Price,
+      quantity: Quantity,
+    });
 
-  res.status(200).send("message : Thêm sản phẩm thành công !!!");
+    res.status(200).send({ message: "Thêm sản phẩm thành công !!!" });
+  } catch (error) {
+
+    res.status(500).send({ message: "Lỗi server khi thêm sản phẩm" });
+  }
 };
 
 // cập nhật product
@@ -110,9 +128,20 @@ exports.putUpdateProduct = async (req, res) => {
       quantity: Quantity,
     },
   };
-  await productModels.updateOne(query, newProduct);
-  const product = await productModels.findById(_id);
-  res.status(200).send("message : Cập nhật sản phẩm thành công !!!");
+
+  try {
+    await productModels.updateOne(query, newProduct);
+    const product = await productModels.findById(_id);
+
+    if (!product) {
+      return res.status(404).send({ message: "Không tìm thấy sản phẩm để cập nhật" });
+    }
+
+    res.status(200).send({ message: "Cập nhật sản phẩm thành công !!!" });
+  } catch (error) {
+
+    res.status(500).send({ message: "Lỗi server khi cập nhật sản phẩm" });
+  }
 };
 
 // xóa product
@@ -133,8 +162,7 @@ exports.getDeleteProduct = async (req, res) => {
       return res.status(404).send({ message: "Không tìm thấy sản phẩm" });
     }
   } catch (error) {
-    // Xử lý lỗi nếu có
-    console.error(error);
+
     return res.status(500).send({ message: "Lỗi server" });
   }
 };
