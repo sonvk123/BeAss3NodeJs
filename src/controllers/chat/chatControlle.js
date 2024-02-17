@@ -1,13 +1,27 @@
 const usesrModel = require("../../models/userModels");
 const sessionModel = require("../../models/sessionModel");
 
+// lấy message theo id phòng
 exports.getMessageByRoomId = async (req, res, next) => {
-  const roomId = req.query.roomId;
-  console.log("roomId:", roomId);
-  const MessageByRoomId = await sessionModel.findById(roomId);
-  res.status(200).send(MessageByRoomId);
+  try {
+    const roomId = req.query.roomId;
+    console.log("roomId:", roomId);
+
+    const MessageByRoomId = await sessionModel.findById(roomId);
+
+    if (!MessageByRoomId) {
+      return res.status(404).json({ message: "Không tìm thấy tin nhắn trong phòng chat" });
+    }
+
+    res.status(200).json(MessageByRoomId);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Lỗi server khi lấy tin nhắn trong phòng chat" });
+  }
 };
 
+
+// thêm message  
 exports.addMessage = async (req, res, next) => {
   const cookies = req.cookies;
   const { roomId, message, sender } = req.body;
@@ -23,18 +37,23 @@ exports.addMessage = async (req, res, next) => {
       { new: true, upsert: true } // Tạo mới nếu không tìm thấy
     )
     .then((updatedSession) => {
-      // Thực hiện các thao tác sau khi cập nhật thành công
-      console.log("Session đã được cập nhật:");
-      res.status(200).json(updatedSession); // Phản hồi với session đã được cập nhật
+      res.status(200).json(updatedSession); 
     })
     .catch((error) => {
-      // Xử lý lỗi nếu cập nhật thất bại
-      console.error("Lỗi khi cập nhật session:", error);
-      res.status(500).json({ error: "Lỗi khi cập nhật session" }); // Phản hồi với lỗi
+
+      res.status(500).json({ error: "Lỗi khi cập nhật session" });
     });
 };
 
+
+// lấy tất cả Room cho admin
 exports.getAllRoom = async (req, res, next) => {
-  const users = await usesrModel.find({ isAdmin: "Client" });
-  res.status(200).send({ message: "lấy data thành công", data: users });
+  try {
+    const users = await userModel.find({ isAdmin: "Client" });
+
+    res.status(200).json({ message: "Lấy dữ liệu thành công", data: users });
+  } catch (error) {
+
+    res.status(500).json({ message: "Lỗi server khi lấy dữ liệu" });
+  }
 };
