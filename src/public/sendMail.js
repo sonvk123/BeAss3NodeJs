@@ -68,7 +68,6 @@ const userSend = async ({
 
   const message = {
     from: process.env.GmailUser,
-    // to: "sonnguyen732000@gmail.com",
     to: email,
     subbject: subbject,
     html: html({ fullname, phone, address, userCartItems, total }),

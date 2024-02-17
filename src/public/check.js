@@ -1,6 +1,6 @@
 // Middleware kiểm tra xác thực đã đăng nhập
 exports.checkAuthentication = (req, res, next) => {
-  console.log("req", req.cookies);
+
   // Kiểm tra xem người dùng đã đăng nhập hay chưa
   if (req.cookies.user && req.cookies.user.isLogin) {
     next(); // Cho phép tiếp tục xử lý yêu cầu
@@ -9,7 +9,7 @@ exports.checkAuthentication = (req, res, next) => {
   }
 };
 
-// Middleware kiểm tra vai trò
+// kiểm tra vai trò
 exports.checkRoleAdmin = (req, res, next) => {
   // Kiểm tra vai trò của người dùng
   if (req.cookies.user && req.cookies.user.isAdmin === "admin") {
@@ -20,7 +20,6 @@ exports.checkRoleAdmin = (req, res, next) => {
 };
 
 exports.checkRoleAdminCounselors = (req, res, next) => {
-  console.log("req", req.cookies);
   // Kiểm tra vai trò của người dùng
   if (
     (req.cookies.user && req.cookies.user.isAdmin === "admin") ||
