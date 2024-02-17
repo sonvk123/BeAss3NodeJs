@@ -126,7 +126,6 @@ exports.postLoginAdmin = async (req, res, next) => {
 
 // khi đăng xuất
 exports.getlogout = async (req, res) => {
-  console.log("khi đăng xuất");
   res.clearCookie("user").send("Đã xóa cookie thành công");
 };
 
@@ -140,10 +139,8 @@ exports.postSignup = async (req, res, next) => {
     const isAdmin = req.query.isAdmin ? req.query.isAdmin : "Client";
     const errors = validationResult(req);
 
-    console.log("errors:", errors.isEmpty());
-
     if (!errors.isEmpty()) {
-      console.log("errors.array():", errors.array());
+
       const data = {
         errorMessage: errors.array()[0].msg,
         oldInput: {
@@ -155,11 +152,10 @@ exports.postSignup = async (req, res, next) => {
         },
         validationErrors: errors.array(),
       };
-      console.log("data:", data);
+
       return res.status(422).send(data);
     } else {
       const hashedPassword = await bcrypt.hash(password, 12);
-      console.log("hashedPassword:", hashedPassword);
 
       const session = await sessionModel.create({
         userId: null,
@@ -178,7 +174,6 @@ exports.postSignup = async (req, res, next) => {
 
       session.userId = user._id;
       session.save();
-      console.log("user:", user);
       // return res.status(200).send({ user });
       return res.status(200).send("gửi thành công");
     }
@@ -192,8 +187,16 @@ exports.postSignup = async (req, res, next) => {
 
 // lấy user theo Id
 exports.getUser = async (req, res, next) => {
-  const userId = req.params.userId;
-  console.log(userId);
-  const user = await User.findById({ _id: userId });
-  console.log("user:", user);
+  const userId = req.params.userId; // Lấy userId từ request params
+  try {
+    const user = await User.findById(userId); // Tìm user dựa trên _id
+
+    if (!user) {
+      return res.status(404).send({ errorMessage: 'Không tìm thấy người dùng' });
+    }
+
+    return res.status(200).send({ user: user }); // Trả về thông tin user
+  } catch (err) {
+    return res.status(500).send({ errorMessage: "Lỗi server" }); // Trả về lỗi server nếu có vấn đề xảy ra
+  }
 };
