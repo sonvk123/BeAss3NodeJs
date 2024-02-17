@@ -3,6 +3,13 @@ const orderModels = require("../../models/orderModels");
 const productModels = require("../../models/productModels");
 const sendMail = require("../../public/sendMail");
 
+
+let url =
+  process.env.NODE_ENV === "production"
+    ? "https://beass3nodejs.onrender.com"
+    : "http://localhost:5000";
+
+
 exports.postEmail = async (req, res) => {
   try {
     const { address, fullname, idUser, phone, to } = req.query;
@@ -32,11 +39,6 @@ exports.postEmail = async (req, res) => {
 
       const s = +item.priceProduct * +item.quantity;
       total += s;
-
-      // KHI DELOY
-      let url = "https://ass3-nodejs-q5t8.onrender.com";
-      // KHI DEV
-      // let url = "http://localhost:5000";
 
       // sửa link hình ảnh
       if (!item.img.includes("firebasestorage")) {
@@ -75,7 +77,7 @@ exports.postEmail = async (req, res) => {
 
     res.status(200).json({ message: "Đã gửi email thành công" });
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: "Lỗi máy chủ" });
   }
 };
