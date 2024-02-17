@@ -60,20 +60,27 @@ exports.getHistory = async (req, res) => {
 
     res.status(500).send({ message: "Lỗi server khi lấy lịch sử đơn hàng" });
   }
+}
 
 // lấy History theo id
 exports.getDetail = async (req, res) => {
-  console.log("getDetail");
   const orderId = req.params.id;
-  const order = await orderModel.findById(orderId);
+  try {
+    const order = await orderModel.findById(orderId);
 
-  order.cart.items.map((item) => {
-    if (item.img.includes("firebasestorage")) {
-      item.img = item.img;
-    } else {
-      item.img = `${url}/${item.img}`;
+    if (!order) {
+      return res.status(404).send({ message: "Đơn hàng không tồn tại" });
     }
-  });
-  console.log("order.cart.items:", order.cart.items);
-  res.send(order);
+
+    order.cart.items.forEach((item) => {
+      if (item.img && !item.img.includes("firebasestorage")) {
+        item.img = `${url}/${item.img}`;
+      }
+    });
+
+    res.send(order);
+  } catch (error) {
+
+    res.status(500).send({ message: "Lỗi server khi lấy chi tiết đơn hàng" });
+  }
 };
