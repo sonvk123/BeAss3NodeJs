@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
-const MONGODB_URI =
-  "mongodb+srv://sonnnfx21638:sonbn2k123@cluster0.tgbkxcz.mongodb.net/";
+require("dotenv").config();
+
+const MONGODB_URI = process.env.URL_MONGODB;
 
 const connect = async () => {
   try {
@@ -15,7 +16,7 @@ const connect = async () => {
     } else if (code === "ENOTFOUIND") {
       throw new Exception("sai tên sever name !!!");
     }
-    console.log(err)
+    console.log(err);
     throw new Exception("lỗi gì đó rồi !!m!");
   }
 };
