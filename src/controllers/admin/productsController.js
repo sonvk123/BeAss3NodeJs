@@ -34,9 +34,12 @@ exports.getPagination = async (req, res) => {
 
     const totalPages = Math.ceil(totalRecords / pageSize); // Tổng số trang
 
+    // Lấy dữ liệu cho trang hiện tại
+    const currentPageData = products.slice(startIndex, endIndex);
 
-    let newProducts = [];
-    products.map((product) => {
+    let newCurrentPageData = [];
+
+    currentPageData.map((product) => {
       const updatedImages = [];
       for (let i = 1; i <= 4; i++) {
         const imageUrl = product[`img${i}`];
@@ -56,12 +59,12 @@ exports.getPagination = async (req, res) => {
         quantity: product.quantity,
         Images: updatedImages,
       };
-      newProducts.push(NewProduct);
+      newCurrentPageData.push(NewProduct);
     });
 
     const data_send = {
       totalPages: totalPages,
-      currentPageData: newProducts,
+      currentPageData: newCurrentPageData,
     };
 
     res.status(200).json(data_send);
